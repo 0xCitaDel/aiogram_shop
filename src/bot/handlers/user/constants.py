@@ -1,0 +1,5 @@
+ID_STUB_SCROLL_PRODUCT = 'stub_scroll_product'
+ID_STUB_SCROLL_CART = 'stub_scroll_cart'
+ID_COUNTER = "counter"
+PRODUCT_COUNTER_MIN_VALUE = 5
+PRODUCT_COUNTER_MAX_VALUE = 1000

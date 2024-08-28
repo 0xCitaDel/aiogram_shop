@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 4b9f06034a6f
+Revision ID: ecc394f4ff3e
 Revises: 
-Create Date: 2024-06-25 15:06:41.769594
+Create Date: 2024-08-28 19:43:46.803131
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '4b9f06034a6f'
+revision: str = 'ecc394f4ff3e'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -28,14 +28,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('title')
     )
-    op.create_table('payment_details',
-    sa.Column('order_id', sa.Integer(), nullable=False),
-    sa.Column('amount', sa.Integer(), nullable=False),
-    sa.Column('status', sa.Enum('PENDING', 'ABANDONED', 'COMPLETE', name='paystatus'), nullable=False),
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('order_id')
-    )
     op.create_table('product_properties',
     sa.Column('property_name', sa.String(length=32), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -47,19 +39,28 @@ def upgrade() -> None:
     sa.Column('user_name', sa.Text(), nullable=True),
     sa.Column('first_name', sa.Text(), nullable=True),
     sa.Column('second_name', sa.Text(), nullable=True),
+    sa.Column('phone_number', sa.String(length=20), nullable=True),
+    sa.Column('address', sa.String(length=256), nullable=True),
     sa.Column('is_premium', sa.Boolean(), nullable=False),
     sa.Column('is_banned', sa.Boolean(), nullable=False),
     sa.Column('role', sa.Enum('USER', 'MODERATOR', 'ADMINISTRATOR', name='role'), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', now())"), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id')
     )
-    op.create_table('order_details',
+    op.create_table('orders',
     sa.Column('user_id', sa.BigInteger(), nullable=False),
+    sa.Column('payment_uuid', sa.String(), nullable=True),
     sa.Column('total_amount', sa.DECIMAL(precision=10, scale=2), nullable=False),
+    sa.Column('order_status_id', sa.Enum('NEW', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELED', 'RETURNED', name='orderstatus'), nullable=False),
+    sa.Column('payment_status_id', sa.Enum('PENDING', 'COMPLETED', 'FAILED', 'REFUNDED', name='paystatus'), nullable=False),
+    sa.Column('shipping_address', sa.String(length=256), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', now())"), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.user_id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('payment_uuid')
     )
     op.create_table('product_property_values',
     sa.Column('property_id', sa.Integer(), nullable=False),
@@ -69,20 +70,21 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('products',
-    sa.Column('title', sa.String(length=32), nullable=False),
+    sa.Column('title', sa.String(length=128), nullable=False),
+    sa.Column('description', sa.String(length=2048), nullable=True),
     sa.Column('price', sa.DECIMAL(precision=10, scale=2), nullable=False),
-    sa.Column('category_id', sa.Integer(), nullable=False),
     sa.Column('photo_id', sa.Text(), nullable=True),
+    sa.Column('category_id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', now())"), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.ForeignKeyConstraint(['category_id'], ['categories.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('photo_id'),
-    sa.UniqueConstraint('title')
+    sa.UniqueConstraint('photo_id')
     )
     op.create_table('cart',
     sa.Column('user_id', sa.BigInteger(), nullable=False),
     sa.Column('product_id', sa.Integer(), nullable=False),
-    sa.Column('quanity', sa.Integer(), nullable=False),
+    sa.Column('quantity', sa.Integer(), nullable=False),
     sa.Column('price', sa.DECIMAL(precision=10, scale=2), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.ForeignKeyConstraint(['product_id'], ['products.id'], ),
@@ -92,12 +94,25 @@ def upgrade() -> None:
     op.create_table('order_items',
     sa.Column('order_id', sa.Integer(), nullable=False),
     sa.Column('product_id', sa.Integer(), nullable=False),
-    sa.Column('quanity', sa.Integer(), nullable=False),
+    sa.Column('quantity', sa.Integer(), nullable=False),
     sa.Column('price', sa.DECIMAL(precision=10, scale=2), nullable=False),
+    sa.Column('total_price', sa.DECIMAL(precision=10, scale=2), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.ForeignKeyConstraint(['order_id'], ['order_details.id'], ),
+    sa.ForeignKeyConstraint(['order_id'], ['orders.id'], ),
     sa.ForeignKeyConstraint(['product_id'], ['products.id'], ),
     sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('payments',
+    sa.Column('order_id', sa.Integer(), nullable=False),
+    sa.Column('payment_uuid', sa.String(), nullable=False),
+    sa.Column('amount', sa.Integer(), nullable=False),
+    sa.Column('status', sa.Enum('PENDING', 'COMPLETED', 'FAILED', 'REFUNDED', name='paystatus'), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', now())"), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.ForeignKeyConstraint(['order_id'], ['orders.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('order_id'),
+    sa.UniqueConstraint('payment_uuid')
     )
     op.create_table('product_characteristics',
     sa.Column('product_id', sa.Integer(), nullable=False),
@@ -115,13 +130,13 @@ def upgrade() -> None:
 def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table('product_characteristics')
+    op.drop_table('payments')
     op.drop_table('order_items')
     op.drop_table('cart')
     op.drop_table('products')
     op.drop_table('product_property_values')
-    op.drop_table('order_details')
+    op.drop_table('orders')
     op.drop_table('users')
     op.drop_table('product_properties')
-    op.drop_table('payment_details')
     op.drop_table('categories')
     # ### end Alembic commands ###

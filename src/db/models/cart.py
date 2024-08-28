@@ -13,7 +13,7 @@ class Cart(Base):
     product_id: Mapped[int] = mapped_column(
         sa.ForeignKey('products.id'), unique=False, nullable=False
     )
-    quanity: Mapped[int] = mapped_column(
+    quantity: Mapped[int] = mapped_column(
         sa.Integer, unique=False, nullable=False
     )
     price: Mapped[float] = mapped_column(

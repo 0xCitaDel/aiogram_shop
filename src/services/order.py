@@ -8,7 +8,7 @@ class OrderService:
     async def _get_order_data(self, order_id):
         order_data = await self.db.order_item.get_by_order_id(order_id)
         return [{'order_id': o[0],
-                 'quanity': o[1],
+                 'quantity': o[1],
                  'price': o[2],
                  'title': o[3]} for o in order_data.all()]
 
@@ -16,7 +16,8 @@ class OrderService:
         total_amount = await self.db.cart.get_total_amount(user_id)
         new_order_id = await self.db.order_detail.add_one({
             'user_id': user_id, 
-            'total_amount': total_amount
+            'total_amount': total_amount,
+            'shipping_address': 'some'
         })
 
         await self._create_order_items(user_id, new_order_id)
@@ -25,7 +26,7 @@ class OrderService:
         await self.db.cart.delete_by_user(user_id)
         await self.db.session.commit()
 
-        return order_items, total_amount
+        return order_items, total_amount, new_order_id
 
     async def _create_order_items(self, user_id, new_order_id):
         order_items = await self._prepare_order_items(user_id, new_order_id)
@@ -39,8 +40,9 @@ class OrderService:
             collection.append({
                 'order_id': order_id,
                 'product_id': row.product_id,
-                'quanity': row.quanity,
-                'price': row.price 
+                'quantity': row.quantity,
+                'price': row.price,
+                'total_price': row.quantity * row.price
             })
         return collection
 

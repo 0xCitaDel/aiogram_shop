@@ -56,6 +56,13 @@ class CryptomusConfig:
     MERCHANT_UUID: str = getenv('MERCHANT_UUID', '')
 
 @dataclass
+class YookassaConfig:
+    """Settings of  payment"""
+
+    API_KEY: str = getenv('API_YOOKASSA_KEY', '')
+    ACCOUNT_ID: str = getenv('YOOKASSA_ACCOUNT_ID', '')
+
+@dataclass
 class AppSettings:
     """
     Base class that combines all configs in itself. All settings are
@@ -64,6 +71,6 @@ class AppSettings:
 
     db = DatabaseConfig()
     bot = BotConfig()
-    pay = CryptomusConfig()
+    pay = YookassaConfig()
 
 settings = AppSettings()

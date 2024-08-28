@@ -16,12 +16,12 @@ class CartRepo(AbstractRepository[Cart]):
         """Initialize user repository as for all users or only for one user."""
         super().__init__(model=Cart, session=session)
     
-    async def add_product_in_cart(self, user_id: int, product_id: int, quanity: int, price: int):
-        return await self.new(user_id=user_id, product_id=product_id, quanity=quanity, price=price)
+    async def add_product_in_cart(self, user_id: int, product_id: int, quantity: int, price: int):
+        return await self.new(user_id=user_id, product_id=product_id, quantity=quantity, price=price)
 
     async def get_total_amount(self, user_id: int):
         """Get total amount in user's cart"""
-        query = select(sum(self.model.quanity * self.model.price))\
+        query = select(sum(self.model.quantity * self.model.price))\
             .filter(self.model.user_id==user_id)
         return await self.session.scalar(query)
 
@@ -35,7 +35,7 @@ class CartRepo(AbstractRepository[Cart]):
 
     async def get_products(self, user_id: int):
         query = select(Cart.id, Cart.product_id,
-                       Cart.quanity, Product.title,
+                       Cart.quantity, Product.title,
                        Product.price, Product.photo_id)\
         .select_from(Cart)\
         .join(Product, Product.id == Cart.product_id)\

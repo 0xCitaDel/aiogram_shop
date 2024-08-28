@@ -2,6 +2,8 @@ from sqlalchemy.engine.url import URL
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine as _create_async_engine
 
+from db.repositories.payment import PaymentRepo
+
 from .repositories import (
     UserRepo,
     ProductRepo,
@@ -9,7 +11,7 @@ from .repositories import (
     CartRepo,
     CharacteristicRepo,
     OrderItemRepo,
-    OrderDetailRepo
+    OrderRepo
 )
 
 
@@ -35,7 +37,8 @@ class Database:
     product: ProductRepo
     characteristic: CharacteristicRepo
     order_item: OrderItemRepo
-    order_detail: OrderDetailRepo
+    order_detail: OrderRepo
+    payment: PaymentRepo
     """ User repository """
 
     session: AsyncSession
@@ -49,7 +52,8 @@ class Database:
         product: ProductRepo = None,
         characteristic: CharacteristicRepo= None,
         order_item: OrderItemRepo = None,
-        order_detail: OrderDetailRepo = None
+        order_detail: OrderRepo = None,
+        payment: PaymentRepo = None
     ):
         """Initialize Database class.
 
@@ -64,4 +68,5 @@ class Database:
         self.product = product or ProductRepo(session=session)
         self.characteristic = characteristic or CharacteristicRepo(session=session)
         self.order_item = order_item or OrderItemRepo(session=session)
-        self.order_detail = order_detail or OrderDetailRepo(session=session)
+        self.order_detail = order_detail or OrderRepo(session=session)
+        self.payment = payment or PaymentRepo(session=session)

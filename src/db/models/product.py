@@ -1,3 +1,5 @@
+import datetime
+
 import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -8,7 +10,10 @@ class Product(Base):
     __tablename__ = 'products'
 
     title: Mapped[str] = mapped_column(
-        sa.String(32), unique=True, nullable=False
+        sa.String(128), unique=False, nullable=False
+    )
+    description: Mapped[str] = mapped_column(
+        sa.String(2048), unique=False, nullable=True
     )
     price: Mapped[float] = mapped_column(
         sa.DECIMAL(10, 2), unique=False, nullable=False
@@ -16,11 +21,14 @@ class Product(Base):
     # manufacturer_id: Mapped[int] = mapped_column(
     #     sa.ForeignKey('manufacturers.id'), unique=False, nullable=False
     # )
+    photo_id: Mapped[str] = mapped_column(
+        sa.Text, unique=True, nullable=True
+    )
     category_id: Mapped[int] = mapped_column(
         sa.ForeignKey('categories.id'), unique=False, nullable=False
     )
-    photo_id: Mapped[str] = mapped_column(
-        sa.Text, unique=True, nullable=True
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        server_default=sa.text("TIMEZONE('utc', now())")
     )
 
 class Property(Base):

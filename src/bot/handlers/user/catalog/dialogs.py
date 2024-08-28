@@ -10,20 +10,21 @@ from . import handlers
 
 
 catalog_window = Window(
-    Const('Choose category...'),
+    Const('Выберите категорию'),
     Select(
         Format('{item[0]}'), id='category',
         item_id_getter=lambda x: x[1], items='category_items',
         on_click=handlers.category_handler
     ),
     Button(
-        Const('Main menu'),
-        id="b_close",
+        Const('☰ Mеню'),
+        id="b_menu",
         on_click=close_dialog
     ),
     getter = getters.categories_getter,
     preview_data = getters.categories_getter,
     state=st.CatalogSG.start
 )
+
 
 catalog_dialog = Dialog(catalog_window)

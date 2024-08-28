@@ -1,3 +1,5 @@
+import datetime
+
 import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -21,6 +23,12 @@ class User(Base):
     second_name: Mapped[str] = mapped_column(
         sa.Text, unique=False, nullable=True
     )
+    phone_number: Mapped[str] = mapped_column(
+        sa.String(20), unique=False, nullable=True
+    )
+    address: Mapped[str] = mapped_column(
+        sa.String(256), unique=False, nullable=True
+    )
     is_premium: Mapped[bool] = mapped_column(
         sa.Boolean, unique=False, nullable=False
     )
@@ -30,8 +38,6 @@ class User(Base):
     role: Mapped[Role] = mapped_column(
         sa.Enum(Role), default=Role.USER
     )
-
-
-
-
-
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        server_default=sa.text("TIMEZONE('utc', now())")
+    )

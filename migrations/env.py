@@ -14,8 +14,8 @@ from src.db.models.category import Category
 from src.db.models.product import Product
 # from src.db.models.manufacturer import Manufacturer
 from src.db.models.cart import Cart
-from src.db.models.order import OrderItem, OrderDetail
-from src.db.models.payment import PaymentDetail
+from src.db.models.order import OrderItem, Order
+from src.db.models.payment import Payment
 from src.db import Base
 from src.config import settings
 

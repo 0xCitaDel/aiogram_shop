@@ -10,7 +10,6 @@ async def go_back(
     ):
     await dialog_manager.back()
 
-
 async def close_dialog(
         callback: CallbackQuery,
         widget: Button,

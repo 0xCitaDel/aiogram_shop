@@ -6,6 +6,13 @@ class MainSG(StatesGroup):
 class AdminSG(StatesGroup):
     start = State() 
 
+class AdminAddProductSG(StatesGroup):
+    title = State() 
+    description = State() 
+    price = State() 
+    image = State()
+    
+
 class OrderSG(StatesGroup):
     start = State()
     payment = State()

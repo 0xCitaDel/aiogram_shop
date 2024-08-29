@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import select, ScalarResult
+from sqlalchemy import insert, select, ScalarResult
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.repositories.abstract import AbstractRepository
@@ -19,6 +19,22 @@ class ProductRepo(AbstractRepository[Product]):
         return await self.get_by_where(
             Product.category_id == category_id
         )
+
+    async def add_product_by_category(
+        self, category_id: Optional[int],
+        title, description, price, photo_id,
+    ):
+        """Get category by parent_id."""
+        statement = insert(self.model).values(
+            title=title,
+            description=description,
+            price=price,
+            photo_id=photo_id,
+            category_id=category_id
+        )
+        await self.session.execute(statement)
+        await self.session.commit()
+
 
 class CharacteristicRepo(AbstractRepository[Characteristic]):
     """Lesosn repository for CRUD and other SQL queries."""
